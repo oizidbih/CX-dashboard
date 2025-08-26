@@ -305,7 +305,13 @@ function App() {
                 <h1 className="text-2xl font-bold orange-text-gradient">
                   CX Impact Simulator
                 </h1>
-                <p className="text-sm text-dark-secondary">
+                <p
+                  className={`text-sm ${
+                    theme === "dark"
+                      ? "text-dark-secondary"
+                      : "theme-text-secondary"
+                  }`}
+                >
                   Service Investment Decision Tool
                 </p>
               </div>
@@ -315,6 +321,21 @@ function App() {
               <div className="orange-accent text-white px-4 py-2 rounded-lg font-semibold shadow-orange-glow hover-orange-glow">
                 Impact Score: {simulationState.overallImpact}
               </div>
+              <button
+                onClick={toggleTheme}
+                className={`p-2 rounded-lg font-medium transition-all hover-orange-glow ${
+                  theme === "dark"
+                    ? "bg-gray-700 hover:bg-gray-600 text-orange-400"
+                    : "bg-gray-200 hover:bg-gray-300 text-orange-600"
+                }`}
+                title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+              >
+                {theme === "dark" ? (
+                  <Sun className="w-5 h-5" />
+                ) : (
+                  <Moon className="w-5 h-5" />
+                )}
+              </button>
               <button
                 onClick={() => setIsSimulating(!isSimulating)}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all hover-orange-glow ${
@@ -336,7 +357,13 @@ function App() {
       </header>
 
       {/* Navigation */}
-      <nav className="bg-dark-surface/60 backdrop-blur-sm border-b border-dark">
+      <nav
+        className={`${
+          theme === "dark" ? "bg-dark-surface/60" : "bg-light-surface/60"
+        } backdrop-blur-sm border-b ${
+          theme === "dark" ? "border-dark" : "border-light"
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex space-x-1">
             {tabs.map((tab) => {
@@ -348,7 +375,9 @@ function App() {
                   className={`flex items-center space-x-2 px-6 py-4 font-medium transition-all relative hover-orange-glow ${
                     activeTab === tab.id
                       ? "text-orange-400 bg-orange-500/10"
-                      : "text-dark-secondary hover:text-orange-300 hover:bg-dark-elevated/50"
+                      : theme === "dark"
+                      ? "text-dark-secondary hover:text-orange-300 hover:bg-dark-elevated/50"
+                      : "text-gray-600 hover:text-orange-600 hover:bg-gray-100/50"
                   }`}
                 >
                   <Icon className="w-5 h-5" />
