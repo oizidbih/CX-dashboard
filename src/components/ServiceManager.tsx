@@ -1,6 +1,15 @@
-import React, { useState } from 'react';
-import { Settings, DollarSign, ToggleLeft, ToggleRight, Plus, Edit3, Trash2, TrendingUp } from 'lucide-react';
-import { Service, TouchPoint, SimulationState } from '../types';
+import React, { useState } from "react";
+import {
+  Settings,
+  DollarSign,
+  ToggleLeft,
+  ToggleRight,
+  Plus,
+  Edit3,
+  Trash2,
+  TrendingUp,
+} from "lucide-react";
+import { Service, TouchPoint, SimulationState } from "../types";
 
 interface ServiceManagerProps {
   services: Service[];
@@ -13,34 +22,39 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
   services,
   setServices,
   touchPoints,
-  simulationState
+  simulationState,
 }) => {
   const [editingService, setEditingService] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
 
   const toggleService = (id: string) => {
-    setServices(services.map(s => s.id === id ? { ...s, enabled: !s.enabled } : s));
+    setServices(
+      services.map((s) => (s.id === id ? { ...s, enabled: !s.enabled } : s))
+    );
   };
 
   const updateService = (id: string, updates: Partial<Service>) => {
-    setServices(services.map(s => s.id === id ? { ...s, ...updates } : s));
+    setServices(services.map((s) => (s.id === id ? { ...s, ...updates } : s)));
   };
 
   const deleteService = (id: string) => {
-    setServices(services.filter(s => s.id !== id));
+    setServices(services.filter((s) => s.id !== id));
   };
 
   const addService = () => {
     const newService: Service = {
       id: Date.now().toString(),
-      name: 'New Service',
-      description: 'Description of the new service',
+      name: "New Service",
+      description: "Description of the new service",
       cost: 25000,
-      fulfillment: touchPoints.reduce((acc, tp) => ({
-        ...acc,
-        [tp.id]: { speed: 50, simplicity: 50, personalization: 50 }
-      }), {}),
-      enabled: false
+      fulfillment: touchPoints.reduce(
+        (acc, tp) => ({
+          ...acc,
+          [tp.id]: { speed: 50, simplicity: 50, personalization: 50 },
+        }),
+        {}
+      ),
+      enabled: false,
     };
     setServices([...services, newService]);
     setEditingService(newService.id);
@@ -49,50 +63,76 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
 
   const getServiceImpact = (service: Service) => {
     // Calculate potential impact if this service were enabled alone
-    const testServices = services.map(s => ({ ...s, enabled: s.id === service.id }));
+    const testServices = services.map((s) => ({
+      ...s,
+      enabled: s.id === service.id,
+    }));
     // This is a simplified calculation - in a real app you'd recalculate the full simulation
-    const avgFulfillment = touchPoints.reduce((sum, tp) => {
-      const fulfillment = service.fulfillment[tp.id];
-      return sum + (fulfillment ? (fulfillment.speed + fulfillment.simplicity + fulfillment.personalization) / 3 : 0);
-    }, 0) / touchPoints.length;
-    
+    const avgFulfillment =
+      touchPoints.reduce((sum, tp) => {
+        const fulfillment = service.fulfillment[tp.id];
+        return (
+          sum +
+          (fulfillment
+            ? (fulfillment.speed +
+                fulfillment.simplicity +
+                fulfillment.personalization) /
+              3
+            : 0)
+        );
+      }, 0) / touchPoints.length;
+
     return Math.round(avgFulfillment * 0.7); // Simplified impact calculation
   };
 
   const FulfillmentEditor: React.FC<{ service: Service }> = ({ service }) => (
     <div className="space-y-4">
       {touchPoints.map((touchPoint) => {
-        const fulfillment = service.fulfillment[touchPoint.id] || { speed: 50, simplicity: 50, personalization: 50 };
-        
+        const fulfillment = service.fulfillment[touchPoint.id] || {
+          speed: 50,
+          simplicity: 50,
+          personalization: 50,
+        };
+
         return (
           <div key={touchPoint.id} className="bg-slate-50 rounded-lg p-4">
-            <h4 className="font-medium text-slate-800 mb-3">{touchPoint.name}</h4>
+            <h4 className="font-medium text-slate-800 mb-3">
+              {touchPoint.name}
+            </h4>
             <div className="space-y-3">
-              {(['speed', 'simplicity', 'personalization'] as const).map((aspect) => (
-                <div key={aspect} className="space-y-2">
-                  <div className="flex justify-between">
-                    <label className="text-sm font-medium text-slate-600 capitalize">{aspect} Fulfillment</label>
-                    <span className="text-sm text-slate-500">{fulfillment[aspect]}%</span>
+              {(["speed", "simplicity", "personalization"] as const).map(
+                (aspect) => (
+                  <div key={aspect} className="space-y-2">
+                    <div className="flex justify-between">
+                      <label className="text-sm font-medium text-slate-600 capitalize">
+                        {aspect} Fulfillment
+                      </label>
+                      <span className="text-sm text-slate-500">
+                        {fulfillment[aspect]}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={fulfillment[aspect]}
+                      onChange={(e) => {
+                        const newFulfillment = {
+                          ...service.fulfillment,
+                          [touchPoint.id]: {
+                            ...fulfillment,
+                            [aspect]: parseInt(e.target.value),
+                          },
+                        };
+                        updateService(service.id, {
+                          fulfillment: newFulfillment,
+                        });
+                      }}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
+                    />
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={fulfillment[aspect]}
-                    onChange={(e) => {
-                      const newFulfillment = {
-                        ...service.fulfillment,
-                        [touchPoint.id]: {
-                          ...fulfillment,
-                          [aspect]: parseInt(e.target.value)
-                        }
-                      };
-                      updateService(service.id, { fulfillment: newFulfillment });
-                    }}
-                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
-                  />
-                </div>
-              ))}
+                )
+              )}
             </div>
           </div>
         );
@@ -100,7 +140,7 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
     </div>
   );
 
-  const enabledServices = services.filter(s => s.enabled);
+  const enabledServices = services.filter((s) => s.enabled);
   const totalCost = enabledServices.reduce((sum, s) => sum + s.cost, 0);
 
   return (
@@ -108,17 +148,24 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">Service Portfolio</h1>
-          <p className="text-slate-600 mt-2">Configure services and their impact on customer experience touchpoints</p>
+          <h1 className="text-3xl font-bold orange-text-gradient">
+            Service Portfolio
+          </h1>
+          <p className="text-dark-secondary mt-2">
+            Configure services and their impact on customer experience
+            touchpoints
+          </p>
         </div>
         <div className="flex items-center space-x-4">
           <div className="text-right">
-            <div className="text-sm text-slate-500">Total Investment</div>
-            <div className="text-2xl font-bold text-slate-800">${(totalCost / 1000).toFixed(0)}K</div>
+            <div className="text-sm text-dark-secondary">Total Investment</div>
+            <div className="text-2xl font-bold text-orange-400">
+              ${(totalCost / 1000).toFixed(0)}K
+            </div>
           </div>
           <button
             onClick={() => setShowAddForm(true)}
-            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-colors"
+            className="flex items-center space-x-2 orange-accent hover-orange-glow text-white px-6 py-3 rounded-xl font-medium transition-all shadow-orange-glow"
           >
             <Plus className="w-5 h-5" />
             <span>Add Service</span>
@@ -128,38 +175,56 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
 
       {/* Service Portfolio Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/60 shadow-sm">
+        <div className="dark-card rounded-2xl p-6 shadow-dark-card hover-orange-glow animate-subtle-float">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-600">Active Services</p>
-              <p className="text-3xl font-bold text-slate-800">{enabledServices.length}</p>
+              <p className="text-sm font-medium text-dark-secondary">
+                Active Services
+              </p>
+              <p className="text-3xl font-bold text-dark-primary">
+                {enabledServices.length}
+              </p>
             </div>
-            <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
-              <Settings className="w-6 h-6 text-emerald-600" />
+            <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center shadow-orange-glow">
+              <Settings className="w-6 h-6 text-emerald-400" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/60 shadow-sm">
+        <div
+          className="dark-card rounded-2xl p-6 shadow-dark-card hover-orange-glow animate-subtle-float"
+          style={{ animationDelay: "0.5s" }}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-600">Annual Investment</p>
-              <p className="text-3xl font-bold text-slate-800">${(totalCost / 1000).toFixed(0)}K</p>
+              <p className="text-sm font-medium text-dark-secondary">
+                Annual Investment
+              </p>
+              <p className="text-3xl font-bold text-dark-primary">
+                ${(totalCost / 1000).toFixed(0)}K
+              </p>
             </div>
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center shadow-orange-glow">
+              <DollarSign className="w-6 h-6 text-orange-400" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/60 shadow-sm">
+        <div
+          className="dark-card rounded-2xl p-6 shadow-dark-card hover-orange-glow animate-subtle-float"
+          style={{ animationDelay: "1s" }}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-600">Impact Score</p>
-              <p className="text-3xl font-bold text-slate-800">{simulationState.overallImpact}</p>
+              <p className="text-sm font-medium text-dark-secondary">
+                Impact Score
+              </p>
+              <p className="text-3xl font-bold text-dark-primary">
+                {simulationState.overallImpact}
+              </p>
             </div>
-            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-purple-600" />
+            <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center shadow-orange-glow">
+              <TrendingUp className="w-6 h-6 text-purple-400" />
             </div>
           </div>
         </div>
@@ -169,7 +234,9 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
       {showAddForm && (
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-slate-200/60 shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-slate-800">Add New Service</h2>
+            <h2 className="text-xl font-semibold text-slate-800">
+              Add New Service
+            </h2>
             <button
               onClick={() => setShowAddForm(false)}
               className="text-slate-400 hover:text-slate-600"
@@ -187,7 +254,9 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
               </div>
               <div className="text-left">
                 <div className="font-medium">Create New Service</div>
-                <div className="text-sm text-slate-500">Define a new customer experience service</div>
+                <div className="text-sm text-slate-500">
+                  Define a new customer experience service
+                </div>
               </div>
             </button>
           </div>
@@ -198,20 +267,34 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
       <div className="space-y-6">
         {services.map((service) => {
           const impact = getServiceImpact(service);
-          const roi = service.cost > 0 ? Math.round(impact * 1000 / service.cost) : 0;
-          
+          const roi =
+            service.cost > 0 ? Math.round((impact * 1000) / service.cost) : 0;
+
           return (
-            <div key={service.id} className={`bg-white/80 backdrop-blur-sm rounded-2xl border shadow-sm overflow-hidden transition-all ${
-              service.enabled ? 'border-emerald-200/60 ring-2 ring-emerald-100' : 'border-slate-200/60'
-            }`}>
+            <div
+              key={service.id}
+              className={`bg-white/80 backdrop-blur-sm rounded-2xl border shadow-sm overflow-hidden transition-all ${
+                service.enabled
+                  ? "border-emerald-200/60 ring-2 ring-emerald-100"
+                  : "border-slate-200/60"
+              }`}
+            >
               {/* Service Header */}
               <div className="p-6 border-b border-slate-200/60">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                      service.enabled ? 'bg-emerald-100' : 'bg-slate-100'
-                    }`}>
-                      <Settings className={`w-6 h-6 ${service.enabled ? 'text-emerald-600' : 'text-slate-400'}`} />
+                    <div
+                      className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                        service.enabled ? "bg-emerald-100" : "bg-slate-100"
+                      }`}
+                    >
+                      <Settings
+                        className={`w-6 h-6 ${
+                          service.enabled
+                            ? "text-emerald-600"
+                            : "text-slate-400"
+                        }`}
+                      />
                     </div>
                     <div className="flex-1">
                       {editingService === service.id ? (
@@ -219,22 +302,36 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
                           <input
                             type="text"
                             value={service.name}
-                            onChange={(e) => updateService(service.id, { name: e.target.value })}
+                            onChange={(e) =>
+                              updateService(service.id, {
+                                name: e.target.value,
+                              })
+                            }
                             className="text-xl font-semibold bg-transparent border-b border-slate-300 focus:border-blue-500 outline-none"
                           />
                           <textarea
                             value={service.description}
-                            onChange={(e) => updateService(service.id, { description: e.target.value })}
+                            onChange={(e) =>
+                              updateService(service.id, {
+                                description: e.target.value,
+                              })
+                            }
                             className="text-slate-600 bg-transparent border border-slate-300 rounded px-2 py-1 text-sm w-full resize-none"
                             rows={2}
                           />
                           <div className="flex items-center space-x-4">
                             <div className="flex items-center space-x-2">
-                              <label className="text-sm font-medium text-slate-600">Annual Cost:</label>
+                              <label className="text-sm font-medium text-slate-600">
+                                Annual Cost:
+                              </label>
                               <input
                                 type="number"
                                 value={service.cost}
-                                onChange={(e) => updateService(service.id, { cost: parseInt(e.target.value) || 0 })}
+                                onChange={(e) =>
+                                  updateService(service.id, {
+                                    cost: parseInt(e.target.value) || 0,
+                                  })
+                                }
                                 className="w-24 px-2 py-1 text-sm border border-slate-300 rounded"
                               />
                             </div>
@@ -242,26 +339,41 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
                       ) : (
                         <div>
-                          <h3 className="text-xl font-semibold text-slate-800">{service.name}</h3>
-                          <p className="text-slate-600">{service.description}</p>
+                          <h3 className="text-xl font-semibold text-slate-800">
+                            {service.name}
+                          </h3>
+                          <p className="text-slate-600">
+                            {service.description}
+                          </p>
                         </div>
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-6">
                     <div className="text-right">
                       <div className="text-sm text-slate-500">Annual Cost</div>
-                      <div className="text-lg font-semibold text-slate-800">${(service.cost / 1000).toFixed(0)}K</div>
+                      <div className="text-lg font-semibold text-slate-800">
+                        ${(service.cost / 1000).toFixed(0)}K
+                      </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm text-slate-500">Potential Impact</div>
-                      <div className="text-lg font-semibold text-slate-800">{impact}</div>
+                      <div className="text-sm text-slate-500">
+                        Potential Impact
+                      </div>
+                      <div className="text-lg font-semibold text-slate-800">
+                        {impact}
+                      </div>
                     </div>
                     <div className="text-right">
                       <div className="text-sm text-slate-500">ROI Score</div>
-                      <div className={`text-lg font-semibold ${roi > 0 ? 'text-emerald-600' : 'text-slate-800'}`}>
-                        {roi > 0 ? '+' : ''}{roi}
+                      <div
+                        className={`text-lg font-semibold ${
+                          roi > 0 ? "text-emerald-600" : "text-slate-800"
+                        }`}
+                      >
+                        {roi > 0 ? "+" : ""}
+                        {roi}
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -276,7 +388,11 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
                         )}
                       </button>
                       <button
-                        onClick={() => setEditingService(editingService === service.id ? null : service.id)}
+                        onClick={() =>
+                          setEditingService(
+                            editingService === service.id ? null : service.id
+                          )
+                        }
                         className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                       >
                         <Edit3 className="w-4 h-4" />
@@ -297,7 +413,9 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
                 <div className="p-6">
                   <div className="flex items-center space-x-2 mb-4">
                     <TrendingUp className="w-5 h-5 text-slate-600" />
-                    <h4 className="text-lg font-semibold text-slate-800">Touchpoint Fulfillment</h4>
+                    <h4 className="text-lg font-semibold text-slate-800">
+                      Touchpoint Fulfillment
+                    </h4>
                   </div>
                   <FulfillmentEditor service={service} />
                 </div>
@@ -310,29 +428,47 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
                     {touchPoints.map((touchPoint) => {
                       const fulfillment = service.fulfillment[touchPoint.id];
                       if (!fulfillment) return null;
-                      
-                      const avgFulfillment = Math.round((fulfillment.speed + fulfillment.simplicity + fulfillment.personalization) / 3);
-                      
+
+                      const avgFulfillment = Math.round(
+                        (fulfillment.speed +
+                          fulfillment.simplicity +
+                          fulfillment.personalization) /
+                          3
+                      );
+
                       return (
-                        <div key={touchPoint.id} className="bg-slate-50 rounded-lg p-4">
-                          <h5 className="font-medium text-slate-700 mb-2">{touchPoint.name}</h5>
+                        <div
+                          key={touchPoint.id}
+                          className="bg-slate-50 rounded-lg p-4"
+                        >
+                          <h5 className="font-medium text-slate-700 mb-2">
+                            {touchPoint.name}
+                          </h5>
                           <div className="space-y-1">
                             <div className="flex justify-between text-xs">
                               <span className="text-slate-500">Speed</span>
-                              <span className="text-slate-700">{fulfillment.speed}%</span>
+                              <span className="text-slate-700">
+                                {fulfillment.speed}%
+                              </span>
                             </div>
                             <div className="flex justify-between text-xs">
                               <span className="text-slate-500">Simplicity</span>
-                              <span className="text-slate-700">{fulfillment.simplicity}%</span>
+                              <span className="text-slate-700">
+                                {fulfillment.simplicity}%
+                              </span>
                             </div>
                             <div className="flex justify-between text-xs">
                               <span className="text-slate-500">Personal</span>
-                              <span className="text-slate-700">{fulfillment.personalization}%</span>
+                              <span className="text-slate-700">
+                                {fulfillment.personalization}%
+                              </span>
                             </div>
                             <div className="pt-1 border-t border-slate-200">
                               <div className="flex justify-between text-sm font-medium">
                                 <span className="text-slate-600">Average</span>
-                                <span className="text-slate-800">{avgFulfillment}%</span>
+                                <span className="text-slate-800">
+                                  {avgFulfillment}%
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -352,8 +488,13 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
           <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Settings className="w-8 h-8 text-slate-400" />
           </div>
-          <h3 className="text-lg font-medium text-slate-800 mb-2">No services configured</h3>
-          <p className="text-slate-600 mb-6">Add your first service to start building your customer experience portfolio.</p>
+          <h3 className="text-lg font-medium text-slate-800 mb-2">
+            No services configured
+          </h3>
+          <p className="text-slate-600 mb-6">
+            Add your first service to start building your customer experience
+            portfolio.
+          </p>
           <button
             onClick={() => setShowAddForm(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-colors"

@@ -6,6 +6,8 @@ import {
   BarChart3,
   TrendingUp,
   Play,
+  Sun,
+  Moon,
   Pause,
 } from "lucide-react";
 import PersonaManager from "./components/PersonaManager";
@@ -13,6 +15,7 @@ import ServiceManager from "./components/ServiceManager";
 import JourneyVisualizer from "./components/JourneyVisualizer";
 import ImpactDashboard from "./components/ImpactDashboard";
 import { Persona, Service, TouchPoint, SimulationState } from "./types";
+import { useTheme } from "./contexts/ThemeContext";
 
 const initialPersonas: Persona[] = [
   {
@@ -153,6 +156,7 @@ const touchPoints: TouchPoint[] = [
 ];
 
 function App() {
+  const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<
     "personas" | "services" | "journey" | "impact"
   >("impact");
@@ -268,7 +272,11 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-dark-gradient relative overflow-hidden">
+    <div
+      className={`min-h-screen relative overflow-hidden ${
+        theme === "dark" ? "bg-dark-gradient" : "theme-bg-primary"
+      }`}
+    >
       {/* Background Orange Glow Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl animate-orange-breathing"></div>
@@ -280,7 +288,11 @@ function App() {
       </div>
 
       {/* Header */}
-      <header className="dark-card sticky top-0 z-50 border-b border-dark">
+      <header
+        className={`theme-card sticky top-0 z-50 border-b ${
+          theme === "dark" ? "border-dark" : "border-light"
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
