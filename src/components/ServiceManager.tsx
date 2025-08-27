@@ -7,13 +7,15 @@ interface ServiceManagerProps {
   setServices: (services: Service[]) => void;
   touchPoints: TouchPoint[];
   simulationState: SimulationState;
+  getTouchPointsForGroup: (group: 'People' | 'Business' | 'Focus Assets') => TouchPoint[];
 }
 
 const ServiceManager: React.FC<ServiceManagerProps> = ({
   services,
   setServices,
   touchPoints,
-  simulationState
+  simulationState,
+  getTouchPointsForGroup
 }) => {
   const [editingService, setEditingService] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -38,7 +40,7 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
       cost: 25000,
       fulfillment: touchPoints.reduce((acc, tp) => ({
         ...acc,
-        [tp.id]: { speed: 50, simplicity: 50, personalization: 50 }
+        [tp.id]: { ces: 50, mitigatedPainpoints: 50, wowMoments: 50 }
       }), {}),
       enabled: false
     };
@@ -53,7 +55,7 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
     // This is a simplified calculation - in a real app you'd recalculate the full simulation
     const avgFulfillment = touchPoints.reduce((sum, tp) => {
       const fulfillment = service.fulfillment[tp.id];
-      return sum + (fulfillment ? (fulfillment.speed + fulfillment.simplicity + fulfillment.personalization) / 3 : 0);
+      return sum + (fulfillment ? (fulfillment.ces + fulfillment.mitigatedPainpoints + fulfillment.wowMoments) / 3 : 0);
     }, 0) / touchPoints.length;
     
     return Math.round(avgFulfillment * 0.7); // Simplified impact calculation
@@ -62,37 +64,45 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
   const FulfillmentEditor: React.FC<{ service: Service }> = ({ service }) => (
     <div className="space-y-4">
       {touchPoints.map((touchPoint) => {
-        const fulfillment = service.fulfillment[touchPoint.id] || { speed: 50, simplicity: 50, personalization: 50 };
+        const fulfillment = service.fulfillment[touchPoint.id] || { ces: 50, mitigatedPainpoints: 50, wowMoments: 50 };
         
         return (
           <div key={touchPoint.id} className="bg-slate-50 rounded-lg p-4">
             <h4 className="font-medium text-slate-800 mb-3">{touchPoint.name}</h4>
             <div className="space-y-3">
-              {(['speed', 'simplicity', 'personalization'] as const).map((aspect) => (
-                <div key={aspect} className="space-y-2">
-                  <div className="flex justify-between">
-                    <label className="text-sm font-medium text-slate-600 capitalize">{aspect} Fulfillment</label>
-                    <span className="text-sm text-slate-500">{fulfillment[aspect]}%</span>
+              {(['ces', 'mitigatedPainpoints', 'wowMoments'] as const).map((aspect) => {
+                const labelMap = {
+                  ces: 'CES Fulfillment',
+                  mitigatedPainpoints: 'Painpoint Mitigation',
+                  wowMoments: 'WOW Moments'
+                };
+                
+                return (
+                  <div key={aspect} className="space-y-2">
+                    <div className="flex justify-between">
+                      <label className="text-sm font-medium text-slate-600">{labelMap[aspect]}</label>
+                      <span className="text-sm text-slate-500">{fulfillment[aspect]}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={fulfillment[aspect]}
+                      onChange={(e) => {
+                        const newFulfillment = {
+                          ...service.fulfillment,
+                          [touchPoint.id]: {
+                            ...fulfillment,
+                            [aspect]: parseInt(e.target.value)
+                          }
+                        };
+                        updateService(service.id, { fulfillment: newFulfillment });
+                      }}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
+                    />
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={fulfillment[aspect]}
-                    onChange={(e) => {
-                      const newFulfillment = {
-                        ...service.fulfillment,
-                        [touchPoint.id]: {
-                          ...fulfillment,
-                          [aspect]: parseInt(e.target.value)
-                        }
-                      };
-                      updateService(service.id, { fulfillment: newFulfillment });
-                    }}
-                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
-                  />
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         );
@@ -311,28 +321,28 @@ const ServiceManager: React.FC<ServiceManagerProps> = ({
                       const fulfillment = service.fulfillment[touchPoint.id];
                       if (!fulfillment) return null;
                       
-                      const avgFulfillment = Math.round((fulfillment.speed + fulfillment.simplicity + fulfillment.personalization) / 3);
+                      const avgFulfillment = Math.round((fulfillment.ces + fulfillment.mitigatedPainpoints + fulfillment.wowMoments) / 3);
                       
                       return (
                         <div key={touchPoint.id} className="bg-slate-50 rounded-lg p-4">
                           <h5 className="font-medium text-slate-700 mb-2">{touchPoint.name}</h5>
                           <div className="space-y-1">
                             <div className="flex justify-between text-xs">
-                              <span className="text-slate-500">Speed</span>
-                              <span className="text-slate-700">{fulfillment.speed}%</span>
+                              <span className="text-slate-500">CES</span>
+                              <span className="text-slate-700">{fulfillment.ces}</span>
                             </div>
                             <div className="flex justify-between text-xs">
-                              <span className="text-slate-500">Simplicity</span>
-                              <span className="text-slate-700">{fulfillment.simplicity}%</span>
+                              <span className="text-slate-500">Painpoints</span>
+                              <span className="text-slate-700">{fulfillment.mitigatedPainpoints}</span>
                             </div>
                             <div className="flex justify-between text-xs">
-                              <span className="text-slate-500">Personal</span>
-                              <span className="text-slate-700">{fulfillment.personalization}%</span>
+                              <span className="text-slate-500">WOW</span>
+                              <span className="text-slate-700">{fulfillment.wowMoments}</span>
                             </div>
                             <div className="pt-1 border-t border-slate-200">
                               <div className="flex justify-between text-sm font-medium">
                                 <span className="text-slate-600">Average</span>
-                                <span className="text-slate-800">{avgFulfillment}%</span>
+                                <span className="text-slate-800">{avgFulfillment}</span>
                               </div>
                             </div>
                           </div>

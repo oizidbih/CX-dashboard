@@ -2,16 +2,17 @@ export interface Persona {
   id: string;
   name: string;
   description: string;
-  volume: number; // Percentage of total customer base
+  group: 'People' | 'Business' | 'Focus Assets'; // New persona groups
+  score: number; // Replaced percentage with score
   relevance: number; // Strategic importance (0-100)
   needs: Record<string, PersonaNeeds>; // Keyed by touchpoint ID
   journey: string[]; // Ordered list of touchpoint IDs
 }
 
 export interface PersonaNeeds {
-  speed: number; // 0-100
-  simplicity: number; // 0-100
-  personalization: number; // 0-100
+  ces: number; // Customer Effort Score (0-100) - replaced speed
+  mitigatedPainpoints: number; // Mitigated Painpoints (0-100) - replaced simplicity
+  wowMoments: number; // WOW moments delivered (0-100) - replaced personalization
 }
 
 export interface Service {
@@ -24,9 +25,9 @@ export interface Service {
 }
 
 export interface ServiceFulfillment {
-  speed: number; // How well it addresses speed needs (0-100)
-  simplicity: number; // How well it addresses simplicity needs (0-100)
-  personalization: number; // How well it addresses personalization needs (0-100)
+  ces: number; // How well it addresses CES needs (0-100)
+  mitigatedPainpoints: number; // How well it addresses mitigated painpoints needs (0-100)
+  wowMoments: number; // How well it addresses WOW moments needs (0-100)
 }
 
 export interface TouchPoint {

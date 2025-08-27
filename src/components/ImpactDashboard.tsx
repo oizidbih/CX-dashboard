@@ -18,7 +18,7 @@ const ImpactDashboard: React.FC<ImpactDashboardProps> = ({
   isSimulating
 }) => {
   const enabledServices = services.filter(s => s.enabled);
-  const totalVolume = personas.reduce((sum, p) => sum + p.volume, 0);
+  const totalScore = personas.reduce((sum, p) => sum + p.score, 0);
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-emerald-600 bg-emerald-50';
@@ -103,8 +103,8 @@ const ImpactDashboard: React.FC<ImpactDashboardProps> = ({
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/60 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-600">Customer Coverage</p>
-              <p className="text-3xl font-bold text-slate-800">{totalVolume}%</p>
+              <p className="text-sm font-medium text-slate-600">Total Score</p>
+              <p className="text-3xl font-bold text-slate-800">{totalScore}</p>
             </div>
             <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
               <Users className="w-6 h-6 text-purple-600" />
@@ -112,7 +112,7 @@ const ImpactDashboard: React.FC<ImpactDashboardProps> = ({
           </div>
           <div className="mt-4 flex items-center space-x-2">
             <span className="text-sm text-slate-600">
-              {personas.length} persona{personas.length !== 1 ? 's' : ''} analyzed
+              {personas.length} persona group{personas.length !== 1 ? 's' : ''} analyzed
             </span>
           </div>
         </div>
@@ -143,7 +143,7 @@ const ImpactDashboard: React.FC<ImpactDashboardProps> = ({
                       {impact.overallScore}
                     </div>
                     <div className="text-sm text-slate-600">
-                      {persona.volume}% volume • {persona.relevance}% relevance
+                      {persona.group} • Score: {persona.score} • {persona.relevance}% relevance
                     </div>
                   </div>
                 </div>
@@ -194,9 +194,8 @@ const ImpactDashboard: React.FC<ImpactDashboardProps> = ({
               <div className="space-y-2">
                 <p className="text-sm text-blue-600 font-medium">Recommended starting points:</p>
                 <ul className="text-sm text-blue-600 space-y-1 ml-4">
-                  <li>• Self-Service Portal for immediate impact across all touchpoints</li>
-                  <li>• AI-Powered Chatbot for personalized support experiences</li>
-                  <li>• Video Tutorial Library for cost-effective onboarding improvement</li>
+                  <li>• Service Robots for efficient and consistent experiences</li>
+                  <li>• Personal AI Concierge for high-touch, personalized interactions</li>
                 </ul>
               </div>
             </div>

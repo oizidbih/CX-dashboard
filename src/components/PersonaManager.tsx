@@ -6,12 +6,14 @@ interface PersonaManagerProps {
   personas: Persona[];
   setPersonas: (personas: Persona[]) => void;
   touchPoints: TouchPoint[];
+  getTouchPointsForGroup: (group: 'People' | 'Business' | 'Focus Assets') => TouchPoint[];
 }
 
 const PersonaManager: React.FC<PersonaManagerProps> = ({
   personas,
   setPersonas,
-  touchPoints
+  touchPoints,
+  getTouchPointsForGroup
 }) => {
   const [editingPersona, setEditingPersona] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -25,17 +27,20 @@ const PersonaManager: React.FC<PersonaManagerProps> = ({
   };
 
   const addPersona = () => {
+    const group = 'People';
+    const relevantTouchPoints = getTouchPointsForGroup(group);
     const newPersona: Persona = {
       id: Date.now().toString(),
       name: 'New Persona',
       description: 'Description of the new persona',
-      volume: 10,
+      group: group,
+      score: 50,
       relevance: 50,
-      needs: touchPoints.reduce((acc, tp) => ({
+      needs: relevantTouchPoints.reduce((acc, tp) => ({
         ...acc,
-        [tp.id]: { speed: 50, simplicity: 50, personalization: 50 }
+        [tp.id]: { ces: 50, mitigatedPainpoints: 50, wowMoments: 50 }
       }), {}),
-      journey: touchPoints.map(tp => tp.id)
+      journey: relevantTouchPoints.map(tp => tp.id)
     };
     setPersonas([...personas, newPersona]);
     setEditingPersona(newPersona.id);
@@ -44,38 +49,46 @@ const PersonaManager: React.FC<PersonaManagerProps> = ({
 
   const NeedsEditor: React.FC<{ persona: Persona }> = ({ persona }) => (
     <div className="space-y-4">
-      {touchPoints.map((touchPoint) => {
-        const needs = persona.needs[touchPoint.id] || { speed: 50, simplicity: 50, personalization: 50 };
+      {getTouchPointsForGroup(persona.group).map((touchPoint) => {
+        const needs = persona.needs[touchPoint.id] || { ces: 50, mitigatedPainpoints: 50, wowMoments: 50 };
         
         return (
           <div key={touchPoint.id} className="bg-slate-50 rounded-lg p-4">
             <h4 className="font-medium text-slate-800 mb-3">{touchPoint.name}</h4>
             <div className="space-y-3">
-              {(['speed', 'simplicity', 'personalization'] as const).map((need) => (
-                <div key={need} className="space-y-2">
-                  <div className="flex justify-between">
-                    <label className="text-sm font-medium text-slate-600 capitalize">{need}</label>
-                    <span className="text-sm text-slate-500">{needs[need]}%</span>
+              {(['ces', 'mitigatedPainpoints', 'wowMoments'] as const).map((need) => {
+                const labelMap = {
+                  ces: 'CES (Customer Effort Score)',
+                  mitigatedPainpoints: 'Mitigated Painpoints',
+                  wowMoments: 'WOW Moments'
+                };
+                
+                return (
+                  <div key={need} className="space-y-2">
+                    <div className="flex justify-between">
+                      <label className="text-sm font-medium text-slate-600">{labelMap[need]}</label>
+                      <span className="text-sm text-slate-500">{needs[need]}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={needs[need]}
+                      onChange={(e) => {
+                        const newNeeds = {
+                          ...persona.needs,
+                          [touchPoint.id]: {
+                            ...needs,
+                            [need]: parseInt(e.target.value)
+                          }
+                        };
+                        updatePersona(persona.id, { needs: newNeeds });
+                      }}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
+                    />
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={needs[need]}
-                    onChange={(e) => {
-                      const newNeeds = {
-                        ...persona.needs,
-                        [touchPoint.id]: {
-                          ...needs,
-                          [need]: parseInt(e.target.value)
-                        }
-                      };
-                      updatePersona(persona.id, { needs: newNeeds });
-                    }}
-                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
-                  />
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         );
@@ -167,8 +180,12 @@ const PersonaManager: React.FC<PersonaManagerProps> = ({
                 
                 <div className="flex items-center space-x-3">
                   <div className="text-right">
-                    <div className="text-sm text-slate-500">Volume</div>
-                    <div className="text-lg font-semibold text-slate-800">{persona.volume}%</div>
+                    <div className="text-sm text-slate-500">Group</div>
+                    <div className="text-lg font-semibold text-slate-800">{persona.group}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm text-slate-500">Score</div>
+                    <div className="text-lg font-semibold text-slate-800">{persona.score}</div>
                   </div>
                   <div className="text-right">
                     <div className="text-sm text-slate-500">Relevance</div>
@@ -191,36 +208,63 @@ const PersonaManager: React.FC<PersonaManagerProps> = ({
                 </div>
               </div>
 
-              {/* Volume and Relevance Sliders */}
+              {/* Group, Score and Relevance Controls */}
               {editingPersona === persona.id && (
-                <div className="mt-6 grid grid-cols-2 gap-6">
+                <div className="mt-6 space-y-4">
                   <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <label className="text-sm font-medium text-slate-600">Customer Volume</label>
-                      <span className="text-sm text-slate-500">{persona.volume}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={persona.volume}
-                      onChange={(e) => updatePersona(persona.id, { volume: parseInt(e.target.value) })}
-                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
-                    />
+                    <label className="text-sm font-medium text-slate-600">Persona Group</label>
+                    <select
+                      value={persona.group}
+                      onChange={(e) => {
+                        const newGroup = e.target.value as 'People' | 'Business' | 'Focus Assets';
+                        const relevantTouchPoints = getTouchPointsForGroup(newGroup);
+                        const newNeeds = relevantTouchPoints.reduce((acc, tp) => ({
+                          ...acc,
+                          [tp.id]: persona.needs[tp.id] || { ces: 50, mitigatedPainpoints: 50, wowMoments: 50 }
+                        }), {});
+                        const newJourney = relevantTouchPoints.map(tp => tp.id);
+                        updatePersona(persona.id, { 
+                          group: newGroup,
+                          needs: newNeeds,
+                          journey: newJourney
+                        });
+                      }}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:border-blue-500 outline-none"
+                    >
+                      <option value="People">People</option>
+                      <option value="Business">Business</option>
+                      <option value="Focus Assets">Focus Assets</option>
+                    </select>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <label className="text-sm font-medium text-slate-600">Strategic Relevance</label>
-                      <span className="text-sm text-slate-500">{persona.relevance}%</span>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <label className="text-sm font-medium text-slate-600">Score</label>
+                        <span className="text-sm text-slate-500">{persona.score}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={persona.score}
+                        onChange={(e) => updatePersona(persona.id, { score: parseInt(e.target.value) })}
+                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
+                      />
                     </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={persona.relevance}
-                      onChange={(e) => updatePersona(persona.id, { relevance: parseInt(e.target.value) })}
-                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
-                    />
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <label className="text-sm font-medium text-slate-600">Strategic Relevance</label>
+                        <span className="text-sm text-slate-500">{persona.relevance}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={persona.relevance}
+                        onChange={(e) => updatePersona(persona.id, { relevance: parseInt(e.target.value) })}
+                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -241,32 +285,32 @@ const PersonaManager: React.FC<PersonaManagerProps> = ({
             {editingPersona !== persona.id && (
               <div className="p-6">
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {touchPoints.map((touchPoint) => {
+                  {getTouchPointsForGroup(persona.group).map((touchPoint) => {
                     const needs = persona.needs[touchPoint.id];
                     if (!needs) return null;
                     
-                    const avgNeed = Math.round((needs.speed + needs.simplicity + needs.personalization) / 3);
+                    const avgNeed = Math.round(((100 - needs.ces) + needs.mitigatedPainpoints + needs.wowMoments) / 3);
                     
                     return (
                       <div key={touchPoint.id} className="bg-slate-50 rounded-lg p-4">
                         <h5 className="font-medium text-slate-700 mb-2">{touchPoint.name}</h5>
                         <div className="space-y-1">
                           <div className="flex justify-between text-xs">
-                            <span className="text-slate-500">Speed</span>
-                            <span className="text-slate-700">{needs.speed}%</span>
+                            <span className="text-slate-500">CES</span>
+                            <span className="text-slate-700">{needs.ces}</span>
                           </div>
                           <div className="flex justify-between text-xs">
-                            <span className="text-slate-500">Simplicity</span>
-                            <span className="text-slate-700">{needs.simplicity}%</span>
+                            <span className="text-slate-500">Painpoints</span>
+                            <span className="text-slate-700">{needs.mitigatedPainpoints}</span>
                           </div>
                           <div className="flex justify-between text-xs">
-                            <span className="text-slate-500">Personal</span>
-                            <span className="text-slate-700">{needs.personalization}%</span>
+                            <span className="text-slate-500">WOW</span>
+                            <span className="text-slate-700">{needs.wowMoments}</span>
                           </div>
                           <div className="pt-1 border-t border-slate-200">
                             <div className="flex justify-between text-sm font-medium">
-                              <span className="text-slate-600">Average</span>
-                              <span className="text-slate-800">{avgNeed}%</span>
+                              <span className="text-slate-600">Impact</span>
+                              <span className="text-slate-800">{avgNeed}</span>
                             </div>
                           </div>
                         </div>

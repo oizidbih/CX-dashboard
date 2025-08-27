@@ -9,122 +9,107 @@ import { Persona, Service, TouchPoint, SimulationState } from './types';
 const initialPersonas: Persona[] = [
   {
     id: '1',
-    name: 'Tech-Savvy Professional',
-    description: 'Young professionals who value efficiency and digital solutions',
-    volume: 35,
-    relevance: 85,
+    name: 'Individual Consumer',
+    description: 'Personal users seeking intuitive and personalized experiences',
+    group: 'People',
+    score: 85,
+    relevance: 80,
     needs: {
-      'onboarding': { speed: 90, simplicity: 70, personalization: 60 },
-      'support': { speed: 95, simplicity: 80, personalization: 40 },
-      'billing': { speed: 85, simplicity: 90, personalization: 30 },
-      'feature-discovery': { speed: 80, simplicity: 60, personalization: 85 }
+      'onboarding': { ces: 20, mitigatedPainpoints: 85, wowMoments: 90 },
+      'discover-plan': { ces: 25, mitigatedPainpoints: 80, wowMoments: 85 },
+      'navigate': { ces: 15, mitigatedPainpoints: 90, wowMoments: 75 },
+      'use': { ces: 20, mitigatedPainpoints: 85, wowMoments: 95 },
+      'recovery': { ces: 30, mitigatedPainpoints: 90, wowMoments: 80 }
     },
-    journey: ['onboarding', 'feature-discovery', 'support', 'billing']
+    journey: ['onboarding', 'discover-plan', 'navigate', 'use', 'recovery']
   },
   {
     id: '2',
-    name: 'Traditional Enterprise User',
-    description: 'Established business users who prefer proven, reliable solutions',
-    volume: 45,
-    relevance: 75,
+    name: 'Enterprise Client',
+    description: 'Business users requiring reliable and scalable solutions',
+    group: 'Business',
+    score: 75,
+    relevance: 90,
     needs: {
-      'onboarding': { speed: 60, simplicity: 85, personalization: 70 },
-      'support': { speed: 70, simplicity: 90, personalization: 80 },
-      'billing': { speed: 65, simplicity: 95, personalization: 60 },
-      'feature-discovery': { speed: 50, simplicity: 85, personalization: 75 }
+      'onboarding': { ces: 35, mitigatedPainpoints: 95, wowMoments: 70 },
+      'discover-plan': { ces: 40, mitigatedPainpoints: 90, wowMoments: 75 },
+      'navigate': { ces: 25, mitigatedPainpoints: 95, wowMoments: 60 },
+      'use': { ces: 30, mitigatedPainpoints: 85, wowMoments: 70 },
+      'recovery': { ces: 45, mitigatedPainpoints: 100, wowMoments: 65 }
     },
-    journey: ['onboarding', 'support', 'billing', 'feature-discovery']
+    journey: ['onboarding', 'discover-plan', 'navigate', 'use', 'recovery']
   },
   {
     id: '3',
-    name: 'Small Business Owner',
-    description: 'Cost-conscious users who need maximum value and simplicity',
-    volume: 20,
-    relevance: 90,
+    name: 'Focus Assets',
+    description: 'Revenue-generating services that drive business value',
+    group: 'Focus Assets',
+    score: 95,
+    relevance: 100,
     needs: {
-      'onboarding': { speed: 75, simplicity: 95, personalization: 50 },
-      'support': { speed: 80, simplicity: 95, personalization: 70 },
-      'billing': { speed: 90, simplicity: 100, personalization: 40 },
-      'feature-discovery': { speed: 70, simplicity: 90, personalization: 60 }
+      'acquire': { ces: 15, mitigatedPainpoints: 85, wowMoments: 90 },
+      'generate-revenue': { ces: 10, mitigatedPainpoints: 95, wowMoments: 100 },
+      'retire': { ces: 25, mitigatedPainpoints: 90, wowMoments: 80 }
     },
-    journey: ['billing', 'onboarding', 'support', 'feature-discovery']
+    journey: ['acquire', 'generate-revenue', 'retire']
   }
 ];
 
 const initialServices: Service[] = [
   {
     id: '1',
-    name: 'AI-Powered Chatbot',
-    description: 'Intelligent chatbot for instant customer support',
-    cost: 50000,
+    name: 'Service Robots',
+    description: 'Automated service delivery systems providing efficient and consistent experiences',
+    cost: 80000,
     fulfillment: {
-      'onboarding': { speed: 85, simplicity: 70, personalization: 90 },
-      'support': { speed: 95, simplicity: 80, personalization: 85 },
-      'billing': { speed: 70, simplicity: 60, personalization: 40 },
-      'feature-discovery': { speed: 80, simplicity: 75, personalization: 95 }
+      'onboarding': { ces: 85, mitigatedPainpoints: 90, wowMoments: 70 },
+      'discover-plan': { ces: 80, mitigatedPainpoints: 85, wowMoments: 75 },
+      'navigate': { ces: 90, mitigatedPainpoints: 95, wowMoments: 65 },
+      'use': { ces: 85, mitigatedPainpoints: 90, wowMoments: 70 },
+      'recovery': { ces: 75, mitigatedPainpoints: 85, wowMoments: 60 },
+      'acquire': { ces: 80, mitigatedPainpoints: 85, wowMoments: 70 },
+      'generate-revenue': { ces: 90, mitigatedPainpoints: 95, wowMoments: 75 },
+      'retire': { ces: 85, mitigatedPainpoints: 90, wowMoments: 65 }
     },
     enabled: false
   },
   {
     id: '2',
-    name: 'Self-Service Portal',
-    description: 'Comprehensive self-service platform for common tasks',
-    cost: 75000,
-    fulfillment: {
-      'onboarding': { speed: 90, simplicity: 85, personalization: 60 },
-      'support': { speed: 80, simplicity: 95, personalization: 50 },
-      'billing': { speed: 95, simplicity: 90, personalization: 30 },
-      'feature-discovery': { speed: 85, simplicity: 80, personalization: 70 }
-    },
-    enabled: false
-  },
-  {
-    id: '3',
-    name: 'Personalized Onboarding',
-    description: 'Tailored onboarding experience based on user profile',
-    cost: 40000,
-    fulfillment: {
-      'onboarding': { speed: 75, simplicity: 80, personalization: 95 },
-      'support': { speed: 60, simplicity: 70, personalization: 80 },
-      'billing': { speed: 50, simplicity: 60, personalization: 70 },
-      'feature-discovery': { speed: 70, simplicity: 65, personalization: 90 }
-    },
-    enabled: false
-  },
-  {
-    id: '4',
-    name: 'Video Tutorial Library',
-    description: 'Comprehensive video guides for all features and processes',
-    cost: 25000,
-    fulfillment: {
-      'onboarding': { speed: 60, simplicity: 90, personalization: 40 },
-      'support': { speed: 70, simplicity: 85, personalization: 30 },
-      'billing': { speed: 65, simplicity: 80, personalization: 20 },
-      'feature-discovery': { speed: 85, simplicity: 90, personalization: 50 }
-    },
-    enabled: false
-  },
-  {
-    id: '5',
-    name: 'Dedicated Account Manager',
-    description: 'Personal account manager for high-value customers',
+    name: 'Personal AI Concierge',
+    description: 'Intelligent personal assistant providing tailored, high-touch customer experiences',
     cost: 120000,
     fulfillment: {
-      'onboarding': { speed: 80, simplicity: 85, personalization: 100 },
-      'support': { speed: 90, simplicity: 90, personalization: 100 },
-      'billing': { speed: 85, simplicity: 95, personalization: 90 },
-      'feature-discovery': { speed: 75, simplicity: 80, personalization: 95 }
+      'onboarding': { ces: 95, mitigatedPainpoints: 85, wowMoments: 100 },
+      'discover-plan': { ces: 90, mitigatedPainpoints: 80, wowMoments: 95 },
+      'navigate': { ces: 85, mitigatedPainpoints: 75, wowMoments: 90 },
+      'use': { ces: 90, mitigatedPainpoints: 80, wowMoments: 100 },
+      'recovery': { ces: 95, mitigatedPainpoints: 90, wowMoments: 95 },
+      'acquire': { ces: 90, mitigatedPainpoints: 80, wowMoments: 95 },
+      'generate-revenue': { ces: 95, mitigatedPainpoints: 85, wowMoments: 100 },
+      'retire': { ces: 85, mitigatedPainpoints: 90, wowMoments: 90 }
     },
     enabled: false
   }
 ];
 
 const touchPoints: TouchPoint[] = [
-  { id: 'onboarding', name: 'Onboarding', description: 'Initial setup and account creation' },
-  { id: 'support', name: 'Customer Support', description: 'Help and troubleshooting' },
-  { id: 'billing', name: 'Billing & Payments', description: 'Payment processing and invoicing' },
-  { id: 'feature-discovery', name: 'Feature Discovery', description: 'Learning about new features' }
+  { id: 'onboarding', name: 'Onboarding', description: 'Initial setup and getting started' },
+  { id: 'discover-plan', name: 'Discover & Plan', description: 'Exploring options and making decisions' },
+  { id: 'navigate', name: 'Navigate', description: 'Moving through the system and finding what you need' },
+  { id: 'use', name: 'Use', description: 'Actively using the service to accomplish goals' },
+  { id: 'recovery', name: 'Recovery', description: 'Getting help when something goes wrong' },
+  { id: 'acquire', name: 'Acquire', description: 'Acquiring and onboarding new revenue-generating assets' },
+  { id: 'generate-revenue', name: 'Generate Revenue', description: 'Operating and maximizing revenue from assets' },
+  { id: 'retire', name: 'Retire', description: 'Decommissioning and transitioning assets out of service' }
 ];
+
+// Helper function to get touchpoints for a specific persona group
+const getTouchPointsForGroup = (group: 'People' | 'Business' | 'Focus Assets'): TouchPoint[] => {
+  if (group === 'Focus Assets') {
+    return touchPoints.filter(tp => ['acquire', 'generate-revenue', 'retire'].includes(tp.id));
+  }
+  return touchPoints.filter(tp => ['onboarding', 'discover-plan', 'navigate', 'use', 'recovery'].includes(tp.id));
+};
 
 function App() {
   const [activeTab, setActiveTab] = useState<'personas' | 'services' | 'journey' | 'impact'>('impact');
@@ -142,27 +127,29 @@ function App() {
         const personaNeeds = persona.needs[touchPoint.id];
         if (!personaNeeds) return { touchPointId: touchPoint.id, score: 0, improvement: 0 };
 
-        // Calculate baseline score (average of needs)
-        const baselineScore = (personaNeeds.speed + personaNeeds.simplicity + personaNeeds.personalization) / 3;
+        // Calculate baseline score (average of needs, note CES is inverted - lower is better)
+        const baselineScore = ((100 - personaNeeds.ces) + personaNeeds.mitigatedPainpoints + personaNeeds.wowMoments) / 3;
         
         // Calculate service fulfillment
-        let serviceFulfillment = { speed: 0, simplicity: 0, personalization: 0 };
+        let serviceFulfillment = { ces: 0, mitigatedPainpoints: 0, wowMoments: 0 };
         if (enabledServices.length > 0) {
           enabledServices.forEach(service => {
             const fulfillment = service.fulfillment[touchPoint.id];
             if (fulfillment) {
-              serviceFulfillment.speed = Math.max(serviceFulfillment.speed, fulfillment.speed);
-              serviceFulfillment.simplicity = Math.max(serviceFulfillment.simplicity, fulfillment.simplicity);
-              serviceFulfillment.personalization = Math.max(serviceFulfillment.personalization, fulfillment.personalization);
+              serviceFulfillment.ces = Math.max(serviceFulfillment.ces, fulfillment.ces);
+              serviceFulfillment.mitigatedPainpoints = Math.max(serviceFulfillment.mitigatedPainpoints, fulfillment.mitigatedPainpoints);
+              serviceFulfillment.wowMoments = Math.max(serviceFulfillment.wowMoments, fulfillment.wowMoments);
             }
           });
         }
 
         // Calculate weighted score based on how well services fulfill needs
+        // CES is inverted logic - higher service CES helps with lower persona CES needs
+        const cesScore = Math.min(100 - personaNeeds.ces, serviceFulfillment.ces);
         const fulfillmentScore = (
-          Math.min(personaNeeds.speed, serviceFulfillment.speed) * 0.4 +
-          Math.min(personaNeeds.simplicity, serviceFulfillment.simplicity) * 0.4 +
-          Math.min(personaNeeds.personalization, serviceFulfillment.personalization) * 0.2
+          cesScore * 0.3 +
+          Math.min(personaNeeds.mitigatedPainpoints, serviceFulfillment.mitigatedPainpoints) * 0.4 +
+          Math.min(personaNeeds.wowMoments, serviceFulfillment.wowMoments) * 0.3
         );
 
         const finalScore = Math.min(100, baselineScore * 0.3 + fulfillmentScore * 0.7);
@@ -176,7 +163,7 @@ function App() {
       });
 
       const overallScore = touchPointImpacts.reduce((sum, impact) => sum + impact.score, 0) / touchPointImpacts.length;
-      const weightedScore = overallScore * (persona.relevance / 100);
+      const weightedScore = overallScore * (persona.score / 100) * (persona.relevance / 100);
 
       return {
         personaId: persona.id,
@@ -287,6 +274,7 @@ function App() {
             personas={personas}
             setPersonas={setPersonas}
             touchPoints={touchPoints}
+            getTouchPointsForGroup={getTouchPointsForGroup}
           />
         )}
         
@@ -296,6 +284,7 @@ function App() {
             setServices={setServices}
             touchPoints={touchPoints}
             simulationState={simulationState}
+            getTouchPointsForGroup={getTouchPointsForGroup}
           />
         )}
         

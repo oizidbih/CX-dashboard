@@ -89,7 +89,7 @@ const JourneyVisualizer: React.FC<JourneyVisualizerProps> = ({
                     <h2 className="text-2xl font-bold text-slate-800">{persona.name}</h2>
                     <p className="text-slate-600">{persona.description}</p>
                     <div className="flex items-center space-x-4 mt-2 text-sm text-slate-500">
-                      <span>{persona.volume}% of customers</span>
+                      <span>{persona.group} • Score: {persona.score}</span>
                       <span>•</span>
                       <span>{persona.relevance}% strategic relevance</span>
                     </div>
@@ -139,16 +139,16 @@ const JourneyVisualizer: React.FC<JourneyVisualizerProps> = ({
                                 <div className="text-xs text-slate-500 font-medium">Customer Needs</div>
                                 <div className="space-y-1">
                                   <div className="flex justify-between text-xs">
-                                    <span className="text-slate-600">Speed</span>
-                                    <span className="text-slate-800">{needs.speed}%</span>
+                                    <span className="text-slate-600">CES</span>
+                                    <span className="text-slate-800">{needs.ces}</span>
                                   </div>
                                   <div className="flex justify-between text-xs">
-                                    <span className="text-slate-600">Simplicity</span>
-                                    <span className="text-slate-800">{needs.simplicity}%</span>
+                                    <span className="text-slate-600">Painpoints</span>
+                                    <span className="text-slate-800">{needs.mitigatedPainpoints}</span>
                                   </div>
                                   <div className="flex justify-between text-xs">
-                                    <span className="text-slate-600">Personal</span>
-                                    <span className="text-slate-800">{needs.personalization}%</span>
+                                    <span className="text-slate-600">WOW</span>
+                                    <span className="text-slate-800">{needs.wowMoments}</span>
                                   </div>
                                 </div>
                               </div>
